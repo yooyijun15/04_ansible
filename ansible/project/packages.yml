@@ -1,0 +1,19 @@
+---
+- name: 패키지 설치
+  hosts: all
+  tasks: 
+    - name: 패키지 설치 - php, mariadb
+      yum:
+        name:
+          - php
+          - mariadb
+        state: present
+- name: 패키지 설치 - gcc, iotop
+  hosts: dev
+  tasks: 
+    - name:
+      yum:
+        name:
+          - gcc
+          - iotop
+        state: present

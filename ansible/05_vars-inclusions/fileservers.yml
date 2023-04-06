@@ -1,0 +1,15 @@
+---
+- name:
+  hosts: fileservers
+  tasks:
+    - name: Import the variables file (변수 포함시키기)
+      include_vars: paths.yml
+    - name: Create the remote directory (변수 테스트 - 디렉토리 생성)
+      file:
+        path: "{{ paths.fileserver }}"
+        state: directory
+        mode: '0755'
+      register: result
+    - name: Debug the result
+      debug:
+        var: result

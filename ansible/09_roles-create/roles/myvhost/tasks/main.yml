@@ -1,0 +1,42 @@
+---
+# tasks file for myvhost
+# 1) 패키지 설치 - httpd
+# 2) 서비스 기동 - httpd
+# 3) 서비스 설정 - /etc/httpd/conf.d/vhost.conf
+# * vhost.conf.j2 -> /etc/httpd/conf.d/vhost.conf
+# * notify ~ handlers
+# 4) 서비스 디렉토리 생성 - /var/www/vhosts/ansible1
+# 5) 파일 생성 - /var/www/vhosts/ansible1/index.html
+
+# 1) 패키지 설치 - httpd
+- name: 패키지 설치 - httpd
+  yum:
+    name: httpd
+    state: latest
+# 2) 서비스 기동 - httpd
+- name: 서비스 기동 - httpd
+  service:
+    name: httpd
+    state: started
+    enabled: true
+# 3) 서비스 설정 - /etc/httpd/conf.d/vhost.conf
+- name: 서비스 설정 - /etc/httpd/conf.d/vhost.conf
+  template:
+    src: vhost.conf.j2
+    dest: /etc/httpd/conf.d/vhost.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - restart httpd
+# 4) 서비스 디렉토리 생성 - /var/www/vhosts/ansible1
+- name: 서비스 디렉토리 생성 - /var/www/vhosts/{{ ansible_hostname }}
+  file:
+    path: "/var/www/vhosts/{{ ansible_hostname }}"
+    state: directory
+# 5) 파일 생성 - /var/www/vhosts/ansible1/index.html
+- name: 파일 생성 - /var/www/vhosts/{{ ansible_hostname }}/index.html
+  copy:
+    content: "Welcome\n"
+    dest: /var/www/vhosts/{{ ansible_hostname }}/index.html
+

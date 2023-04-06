@@ -1,0 +1,33 @@
+---
+- name: Take Failure Exercise
+  hosts: databases
+  vars:
+    - web_pkg: httpd
+    - db_pkg: mariadb-server
+    - db_svc: mariadb
+  tasks:
+    - name: Check local time
+      command: date
+      register: command_result
+      changed_when: false
+    - name: Print local time
+      debug:
+        var: command_result.stdout
+    - name: Attempt to set up a web server
+      block:
+        - name: Install "{{ web_pkg }}" package
+          yum:
+            name: "{{ web_pkg }}"
+            state: present
+          failed_when: web_pkg == "httpd"
+      rescue:
+        - name: Install "{{ db_pkg }}" package
+          yum:
+            name: "{{ db_pkg }}"
+            state: present
+      always:
+        - name: Start "{{ db_svc }}" service
+          service:
+            name: "{{ db_svc
+             }}"
+            state: started

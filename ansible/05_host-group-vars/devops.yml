@@ -1,0 +1,24 @@
+---
+- name: Create user devops
+  hosts: all
+  vars:
+    devops_pass: soldesk1.
+  tasks:
+    # useradd devops
+    # passwd devops
+    # /etc/sudoers.d/devops
+    - name: Add user a devops
+      user:
+        name: devops
+        password: "{{ devops_pass | password_hash('sha512') }}"
+
+    - name: Create file - /etc/sudoers.d/devops
+      copy:
+        src: files/devops
+        dest: /etc/sudoers.d/devops
+
+    - name: Deploy authorized_key file
+      authorized_key:
+        user: devops
+        state: present
+        key: "{{ lookup('file', '/home/ansible/.ssh/id_rsa.pub') }}"

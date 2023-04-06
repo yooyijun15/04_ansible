@@ -1,0 +1,12 @@
+---
+- name:
+  hosts: webservers
+  vars_files:
+    - secret.yml
+    - secret2.yml
+  tasks:
+    - name:
+      user:
+        name: "{{ username }}"
+        state: absent
+        remove: yes

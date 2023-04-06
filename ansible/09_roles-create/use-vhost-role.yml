@@ -1,0 +1,15 @@
+---
+- name: Use myvhost role playbook
+  hosts: webservers
+  pre_tasks:
+    - name: pre_tasks message
+      debug: 
+        msg: '===== START: web server configuration ====='
+
+  roles:
+    - myvhost
+
+  post_tasks:
+    - name: HTML content is installed
+      debug: 
+        msg: '===== STOP: web server configuration ====='

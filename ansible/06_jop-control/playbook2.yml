@@ -1,0 +1,25 @@
+---
+- name: Take Failure Exercise
+  hosts: databases
+  vars:
+    - web_pkg: httpd
+    - db_pkg: mariadb-server
+    - db_svc: mariadb
+  tasks:
+    - name: Attempt to set up a web server
+      block:
+        - name: Install "{{ web_pkg }}" package
+          yum:
+            name: "{{ web_pkg }}"
+            state: present
+      rescue:
+        - name: Install "{{ db_pkg }}" package
+          yum:
+            name: "{{ db_pkg }}"
+            state: present
+      always:
+        - name: Start "{{ db_svc }}" service
+          service:
+            name: "{{ db_svc
+             }}"
+            state: started

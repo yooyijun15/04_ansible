@@ -1,0 +1,18 @@
+---
+- name:
+  hosts: databases
+  vars:
+    - web_pkg: httpd
+    - db_pkg: mariadb-server
+    - db_svc: mariadb
+  tasks:
+    - name:
+      service:
+        name: "{{ db_svc }}"
+        state: stopped
+    - name:
+      yum:
+        name: 
+          - "{{ web_pkg }}"
+          - "{{ db_pkg }}"
+        state: absent

@@ -1,0 +1,32 @@
+---
+- name:
+  hosts: webserver
+  vars:
+    remote_dir: /etc/ansible/facts.d
+    facts_file: custom.fact
+  tasks:
+  # 1) 웹 서비스 중지
+  # 2) 웹 패키지 삭제
+  # 3) 배포된 팩트 삭제
+  # 4) 디렉토리 삭제
+
+  # 1) 웹 서비스 중지
+    - name: 웹 서비스 중지
+      service:
+        name: "{{ ansible_local.custom.general.service }}"
+        state: "{{ ansible_local.custom.general.state }}"
+  # 2) 웹 패키지 삭제
+    - name: 웹 패키지 삭제
+      yum:
+        name: "{{ ansible_local.custom.general.package }}"
+        state: absent
+  # 3) 배포된 팩트 삭제
+    - name: 배포된 팩트 삭제
+      file:
+        path: "{{ facts_file }}"
+        state: absent
+  # 4) 디렉토리 삭제
+    - name: 디렉토리 삭제
+      file:
+        path: "{{ remote_dir }}"
+        state: absent

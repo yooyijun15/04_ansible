@@ -1,0 +1,29 @@
+---
+- name:
+  hosts: web1
+  tasks:
+    - name:
+      firewalld:
+        service: "{{ item }}"
+        state: disabled
+      loop:
+        - http
+        - https
+    - name:
+      service:
+        name: "{{ item }}"
+        state: stopped
+      loop:
+        - httpd
+        - firewalld
+    - name:
+      file:
+        path: /var/www/html/index.html
+        state: absent
+    - name:
+      yum:
+        name:
+        - httpd
+        - mod_ssl
+        - firewalld
+        state: absent

@@ -1,0 +1,22 @@
+---
+- name: Restore playbook.yml
+  hosts: all
+  vars:
+    db_package:
+      - mariadb-server
+      - python3-PyMySQL
+    db_svc: mariadb
+    db_conf_src: http://ansible.example.com/my.cnf.standard
+    db_conf_dest: /etc/my.cnf
+  tasks:
+    # 1) DB 서비스 종료 - mariadb
+    # 2) DB 패키지 삭제 - mariadb-server, python3-PyMySQL
+    - name:
+      service:
+        name: "{{ db_svc }}"
+        state: stopped
+    - name:
+      yum:
+        name: "{{ db_package }}"
+        state: absent
+        

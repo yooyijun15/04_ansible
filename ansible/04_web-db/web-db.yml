@@ -1,0 +1,51 @@
+---
+- name:
+  hosts: web1
+  tasks:
+    - name:
+      yum:
+        name:
+        - httpd
+        - php
+        - php-mysqlnd
+        - php-pdo
+        - mariadb-server
+        - firewalld
+        state: latest
+    - name:
+      get_url:
+        url: http://192.168.10.10/index.php
+        dest: /var/www/html/index.php
+    - name:
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
+        - firewalld
+        - httpd
+        - mariadb
+    - name:
+      firewalld:
+        service: "{{ item }}"
+        permanent: yes
+        immediate: yes
+        state: enabled
+      loop:
+        - http
+        - https
+- name:
+  hosts: localhost
+  tasks:
+  - name:
+    uri:
+      url: http://web1.example.com
+      return_content: yes
+      status_code: 200
+
+
+
+
+
+    
+    

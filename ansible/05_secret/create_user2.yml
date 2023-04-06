@@ -1,0 +1,10 @@
+---
+- name:
+  hosts: web2
+  remote_user: ansible
+  vars_files: secret2.yml
+  tasks:
+    - name: Creating user from secret2.yml
+      user:
+        name: "{{ username }}"
+        password: "{{ pwhash | password_hash('sha512') }}"

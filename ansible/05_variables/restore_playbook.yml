@@ -1,0 +1,33 @@
+---
+- name:
+  hosts: webserver
+  vars_files: vars/vars.yml
+  tasks:
+    - name:
+      firewalld:
+        service: "{{ item }}"
+        state: disabled
+      loop:
+        - "{{ fw_http }}"
+        - "{{ fw_https }}"
+      ignore_errors: yes
+    - name:
+      file:
+        path: /var/www/html/index.html
+        state: absent
+    - name:
+      service:
+        name: "{{ item }}"
+        state: stopped
+        enabled: no
+      loop:
+        - "{{ svc_fw }}"
+        - "{{ svc_web }}"
+    - name:
+      yum:
+        name:
+        - "{{ pkg_web }}"
+        - "{{ pkg_web_mod }}"
+        - "{{ pkg_python }}"
+        - "{{ pkg_fw }}"
+        state: absent

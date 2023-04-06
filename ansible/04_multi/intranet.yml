@@ -1,0 +1,48 @@
+---
+- name:
+  hosts: web1
+  tasks:
+    - name:
+      yum:
+        name:
+          - httpd
+          - mod_ssl
+          - firewalld
+        state: latest
+    - name:
+      copy:
+        content: "Test intranet.yml\n"
+        dest: /var/www/html/index.html
+    - name:
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
+        - httpd
+        - firewalld
+    - name:
+      firewalld:
+        service: "{{ item }}"
+        permanent: yes
+        immediate: yes
+        state: enabled
+      loop:
+        - http
+        - https
+- name:
+  hosts: localhost
+  tasks:
+    - name:
+      uri:
+        url: http://web1.example.com
+        return_content: yes
+        status_code: 200
+      register: output
+    - name:
+      debug:
+        var: output
+
+
+
+

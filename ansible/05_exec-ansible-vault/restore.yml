@@ -1,0 +1,13 @@
+---
+  - name:
+    hosts: devservers
+    remote_user: devops
+    vars_files: vars/secret.yml
+    tasks:
+      - name:
+        user:
+          name: "{{ item.name }}"
+          state: absent
+          remove: yes
+        with_items: "{{ newusers }}"
+

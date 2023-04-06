@@ -1,0 +1,38 @@
+---
+- name:
+  hosts: web1
+  tasks:
+    - name:
+      firewalld:
+        service: "{{ item }}"
+        state: disabled
+      loop:
+        - http
+        - https
+      ignore_errors: yes
+    - name:
+      file:
+        path: /var/www/html/index.php
+        state: absent 
+    - name:
+      service:
+        name: "{{ item }}"
+        state: stopped
+        enabled: no
+      loop:
+        - firewalld
+        - httpd
+        - mariadb
+    - name:
+      yum:
+        name:
+        - httpd
+        - php
+        - php-mysqlnd
+        - php-pdo
+        - mariadb-server
+        - firewalld
+        state: absent
+
+
+

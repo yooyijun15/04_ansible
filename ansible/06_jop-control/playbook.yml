@@ -1,0 +1,17 @@
+---
+- name: Take Failure Exercise
+  hosts: databases
+  vars:
+    - web_pkg: httpd
+    - db_pkg: mariadb-server
+    - db_svc: mariadb
+  tasks:
+    - name: Install "{{ web_pkg }}" package
+      yum:
+        name: "{{ web_pkg }}"
+        state: present
+      ignore_errors: yes
+    - name: Install "{{ db_pkg }}" package
+      yum:
+        name: "{{ db_pkg }}"
+        state: present

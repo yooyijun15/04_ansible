@@ -1,0 +1,12 @@
+---
+- name: Create file /etc/hosts
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: copy from files/hosts to /etc/hosts
+      copy:
+        src: files/hosts
+        dest: /etc/hosts
+        owner: root
+        group: root
+        mode: '0644'

@@ -1,0 +1,10 @@
+---
+- name:
+  hosts: web1
+  remote_user: ansible
+  vars_files: secret.yml
+  tasks:
+    - name: Creating user from secret.yml
+      user:
+        name: "{{ username }}"
+        password: "{{ pwhash }}"

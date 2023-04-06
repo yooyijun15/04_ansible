@@ -1,0 +1,12 @@
+---
+- name:
+  hosts: all
+  tasks:
+    - name:
+      yum:
+        name:
+          - httpd
+          - mariadb-server
+          - tree
+          - mutt
+        state: absent

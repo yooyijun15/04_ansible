@@ -1,0 +1,118 @@
+---
+- name: Install and Configure werbserver with basic auth
+  hosts: ansible1.example.com
+  vars:
+    firewall_pkg: firewalld
+    firewall_svc: firewalld
+    web_pkg: httpd
+    web_svc: httpd
+    ssl_pkg: mod_ssl
+    httpdconf_src: files/httpd.conf
+    httpdconf_dest: /etc/httpd/conf/httpd.conf
+    htaccess_src: files/htaccess
+    secrets_dir: /etc/httpd/secrets
+    secrets_src: files/htpasswd
+    secrets_dest: /etc/httpd/secrets/htpasswd
+    web_root: /var/www/html
+  tasks:
+  # 1) 패키지 설치 - firewalld, httpd, mod_ssl
+  # 2) 웹 서비스 설정
+  # 2-1) /etc/httpd/conf/httpd.conf (files/httpd.conf)
+  # 2-2) /var/www/html/.htaccess (files/.htaccess)
+  # 2-3) /etc/httpd/secrets/htpasswd (files/htpasswd)
+  # * /etc/httpd/secrets 디렉토리 생성
+  # * /etc/httpd/secrets/htpasswd 파일 배포
+  # 2-4) /var/www/html/index.html (using the facts)
+  # * ansible1.example.com - ip
+  # 3) 서비스 기동 - firewalld, httpd
+  # 4) 방화벽 서비스 등록 - http, https
+  # 5) 테스트 - 인증
+
+  # 1) 패키지 설치 - firewalld, httpd, mod_ssl
+    - name: 패키지 설치 - firewalld, httpd, mod_ssl
+      yum:
+        name: 
+          - "{{ firewall_pkg }}"
+          - "{{ web_pkg }}"
+          - "{{ ssl_pkg }}"
+        state: present
+  # 2) 웹 서비스 설정
+  # 2-1) /etc/httpd/conf/httpd.conf (files/httpd.conf)
+    - name: /etc/httpd/conf/httpd.conf (files/httpd.conf)
+      copy:
+        src: "{{ httpdconf_src }}"
+        dest: "{{ httpdconf_dest }}"
+        owner: root
+        group: root
+        mode: 064
+  # 2-2) /var/www/html/.htaccess (files/.htaccess)
+    - name: /var/www/html/.htaccess (files/.htaccess)
+      copy:
+        src: "{{ htaccess_src }}"
+        dest: "{{ web_root }}/.htaccess"
+        owner: apache
+        group: apache
+        mode: 0400
+  # 2-3) /etc/httpd/secrets/htpasswd (files/htpasswd)
+  # * /etc/httpd/secrets 디렉토리 생성
+    - name: /etc/httpd/secrets 디렉토리 생성
+      file:
+        path: "{{ secrets_dir }}"
+        state: directory
+        owner: apache
+        group: apache
+        mode: 0400
+  # * /etc/httpd/secrets/htpasswd 파일 배포
+    - name: /etc/httpd/secrets/htpasswd 파일 배포
+      copy:
+        src: "{{ secrets_src }}"
+        dest: "{{ secrets_dest }}"
+        owner: apache
+        group: apache
+        mode: 0400
+  # 2-4) /var/www/html/index.html (using the facts)
+  # * ansible1.example.com - ip
+    - name: ansible1.example.com - ip
+      copy:
+        content: "{{ ansible_facts['fpdn'] }} ({{ ansible_facts['default_ipv4']['address'] }}) has been customized by Ansible.\n"
+        dest: "{{ web_root }}/index.html"
+  # 3) 서비스 기동 - firewalld, httpd
+    - name: 서비스 기동 - firewalld, httpd
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
+        - "{{ firewall_svc }}"
+        - "{{ web_svc }}"
+  # 4) 방화벽 서비스 등록 - http, https
+    - name: 방화벽 서비스 등록 - http, https
+      firewalld:
+        service: "{{ item }}"
+        state: enabled
+        permanent: yes
+        immediate: yes
+      loop:
+        - http
+        - https
+  # 5) 테스트 - 인증
+- name: 테스트 - 인증
+  hosts: localhost
+  become: no
+  vars:
+    - web_user: guest
+  vars_files:
+    - vars/secret.yml
+  tasks:
+    - name:
+      uri:
+        url: https://ansible1.example.com
+        validate_certs: no
+        force_basic_auth: yes
+        user: "{{ web_user }}"
+        password: "{{ web_pass }}"
+        return_content: yes
+        status_code: 200
+      register: auth_test
+    - debug:
+        var: auth_test.content

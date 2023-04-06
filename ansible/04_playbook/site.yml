@@ -1,0 +1,28 @@
+---
+- name: Install and start apache httpd
+  hosts: webservers
+  tasks:
+  - name: (1) Install the package - httpd, mod_ssl
+    yum:
+      name:
+        - httpd
+        - mod_ssl
+      state: present
+  - name: (2) Configure the web service with httpd
+    copy:
+      src: files/index.html
+      dest: /var/www/html/index.html
+  - name: (3) Start and web service
+    service:
+      name: httpd
+      state: started
+      enabled: yes
+  - name: (4) Configure the firewall with firewalld
+    firewalld:
+      service: "{{ item }}"
+      permanent: yes
+      immediate: yes
+      state: enabled
+    loop:
+      - http
+      - https

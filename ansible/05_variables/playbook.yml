@@ -1,0 +1,44 @@
+---
+- name:
+  hosts: webserver
+  vars_files: vars/vars.yml
+  tasks:
+    - name:
+      yum:
+        name:
+          - "{{ pkg_web }}"
+          - "{{ pkg_web_mod }}"
+          - "{{ pkg_python }}"
+          - "{{ pkg_fw }}"
+        state: present
+    - name:
+      copy:
+        content: '<h1>05_variables</h1>\n'
+        dest: /var/www/html/index.html
+    - name:
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
+        - "{{ svc_fw }}"
+        - "{{ svc_web }}"
+    - name:
+      firewalld:
+        service: "{{ item }}"
+        permanent: yes
+        immediate: yes
+        state: enabled
+      loop:
+        - "{{ fw_http }}"
+        - "{{ fw_https }}"
+- name:
+  hosts: localhost
+  tasks:
+    - name: 
+      uri:
+       url: http://web1.example.com
+       return_content: yes
+       status_code: 200
+      register: output
+    - debug: var=output 

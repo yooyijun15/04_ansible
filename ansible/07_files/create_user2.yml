@@ -1,0 +1,41 @@
+---
+- name: Create user accounts for all our servers
+  hosts: all
+  gather_facts: no
+  remote_user: ansible
+  vars_files: secret2.yml
+  tasks:
+    - name: Creating user from secret2.yml
+      user:
+        name: "{{ username }}"
+        password: "{{ pwhash | password_hash('sha512') }}"
+    - name: Deploy file
+      copy:
+        src: files/devops
+        dest: /etc/sudoers.d/devops
+        owner: root
+        group: root
+        mode: '0440'
+    - name: Ensure key is in devops's ~/.ssh/authorized_keys
+      authorized_key:
+        user: devops
+        state: present
+        key: "{{ item }}"
+      with_file:
+        - ~/.ssh/id_rsa.pub
+        
+
+
+
+
+
+
+
+
+
+
+
+      
+
+
+
